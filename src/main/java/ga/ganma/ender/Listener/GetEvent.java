@@ -3,9 +3,8 @@ package ga.ganma.ender.Listener;
 import ga.ganma.ender.Endercloud;
 import ga.ganma.ender.Filerelation;
 import ga.ganma.ender.inventoryRelation.InventoryAPI;
-import ga.ganma.ender.plan;
+import ga.ganma.ender.Plan;
 import ga.ganma.ender.playerdata.Playerdata;
-import jdk.internal.ref.Cleaner;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,7 +13,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -30,7 +28,7 @@ public class GetEvent implements Listener {
 	public void getplayerloginEvent(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
 		if (Filerelation.namecheck(p)) {
-			if (Filerelation.readFile(p).getPlan() == plan.FREE) {
+			if (Filerelation.readFile(p).getPlan() == Plan.FREE) {
 				p.sendMessage("[foofle drive]あなたは現在" + Filerelation.readFile(p).getPlan() + "プランに加入しています。");
 				return;
 			}
@@ -46,7 +44,7 @@ public class GetEvent implements Listener {
 									Endercloud.econ.depositPlayer(p, -amout[1]);
 									p.sendMessage("[foofle drive]LIGHTプランの料金を支払いました。");
 								} else {
-									InventoryAPI.planchange(p, plan.FREE);
+									InventoryAPI.planchange(p, Plan.FREE);
 									p.sendMessage("[foofle drive]お金が足りないため自動的にfreeプランへ移行しました。");
 									p.sendMessage("[foofle drive]その際、2段目以降にあるアイテムを全消去しました。");
 								}
@@ -56,7 +54,7 @@ public class GetEvent implements Listener {
 									Endercloud.econ.depositPlayer(p, -amout[2]);
 									p.sendMessage("[foofle drive]MIDDLEプランの料金を支払いました。");
 								} else {
-									InventoryAPI.planchange(p, plan.FREE);
+									InventoryAPI.planchange(p, Plan.FREE);
 									p.sendMessage("[foofle drive]お金が足りないため自動的にfreeプランへ移行しました。");
 									p.sendMessage("[foofle drive]その際、2段目以降にあるアイテムを全消去しました。");
 								}
@@ -66,7 +64,7 @@ public class GetEvent implements Listener {
 									Endercloud.econ.depositPlayer(p, -amout[3]);
 									p.sendMessage("[foofle drive]LARGEプランの料金を支払いました。");
 								} else {
-									InventoryAPI.planchange(p, plan.FREE);
+									InventoryAPI.planchange(p, Plan.FREE);
 									p.sendMessage("[foofle drive]お金が足りないため自動的にfreeプランへ移行しました。");
 									p.sendMessage("[foofle drive]その際、2段目以降にあるアイテムを全消去しました。");
 								}
@@ -89,7 +87,7 @@ public class GetEvent implements Listener {
 			}
 		}
 		else {
-			Playerdata pd = new Playerdata(p, Bukkit.getServer().createInventory(null, 9, "foofle Drive"), plan.FREE);
+			Playerdata pd = new Playerdata(p, Bukkit.getServer().createInventory(null, 9, "foofle Drive"), Plan.FREE);
 			Filerelation.createFile(pd);
 			p.sendMessage("[foofle drive]あなたは自動的に" + Filerelation.readFile(p).getPlan() + "プランに加入しました。");
 		}
