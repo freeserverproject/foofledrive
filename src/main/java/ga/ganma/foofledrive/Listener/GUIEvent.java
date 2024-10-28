@@ -22,137 +22,122 @@ import java.util.HashMap;
 
 public class GUIEvent implements Listener {
 
-	private static HashMap<Player, ga.ganma.foofledrive.plan> ProvisionalPlan = new HashMap<>();
+    private static final HashMap<Player, ga.ganma.foofledrive.plan> provisionalPlan = new HashMap<>();
 
-	public GUIEvent(Plugin pl) {
-		Bukkit.getPluginManager().registerEvents(this, pl);
-	}
+    public GUIEvent(Plugin pl) {
+        Bukkit.getPluginManager().registerEvents(this, pl);
+    }
 
-	@EventHandler
-	public void getInventoryclickEvent(InventoryClickEvent e) {
-		if (e.getWhoClicked() != null) {
-			Player pl = (Player) e.getWhoClicked();
-			if (CommandMain.isopenInventory.containsKey(pl)) {
-				if (CommandMain.isopenInventory.get(pl)) {
-					ItemStack clickedItem = e.getCurrentItem();
-					Inventory clickedInventory = e.getClickedInventory();
-					if (clickedItem == null || clickedInventory == null) {
-						return;
-					}
-					if (! clickedItem.hasItemMeta()) {
-						return;
-					}
-					if (e.getView().getType() != InventoryType.CREATIVE && e.getView().getTitle().contains("プラン選択画面")) {
-						if (e.getSlot() == 10) {
-							e.setCancelled(true);
-							pl.openInventory(yesornoInv());
-							ProvisionalPlan.put(pl, plan.FREE);
-						} else if (e.getSlot() == 12) {
-							e.setCancelled(true);
-							pl.openInventory(yesornoInv());
-							ProvisionalPlan.put(pl, plan.LIGHT);
-						} else if (e.getSlot() == 14) {
-							e.setCancelled(true);
-							pl.openInventory(yesornoInv());
-							ProvisionalPlan.put(pl, plan.MIDDLE);
-						} else if (e.getSlot() == 16) {
-							e.setCancelled(true);
-							pl.openInventory(yesornoInv());
-							ProvisionalPlan.put(pl, plan.LARGE);
-						} else if (clickedItem.getType() == Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
-							e.setCancelled(true);
-						}
-					} else if (e.getView().getTitle().contains("契約してよろしいですか？")) {
-						if (e.getSlot() == 15) {
-							e.setCancelled(true);
-							Playerdata pd;
-							switch (ProvisionalPlan.get(pl)) {
-								case FREE:
-									InventoryAPI.planchange(pl, plan.FREE);
-									pd = Filerelation.readFile(pl);
-									if (pd.getFinish() == null) {
-										pd.setFinish(Calendar.getInstance());
-										Filerelation.createFile(pd);
-									}
-									pl.sendMessage("[foofle drive]プランを" + plan.FREE + "プランに変更しました。");
-									break;
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (e.getWhoClicked() == null) {
+            return;
+        }
 
-								case LIGHT:
-									boolean is = InventoryAPI.planchange(pl, plan.LIGHT);
-									pd = Filerelation.readFile(pl);
-									if (pd.getFinish() == null) {
-										pd.setFinish(Calendar.getInstance());
-										Filerelation.createFile(pd);
-									}
-									if (is) {
-										pl.sendMessage("[foofle drive]プランを" + plan.LIGHT + "プランに変更しました。");
-									}
-									break;
+        Player player = (Player) e.getWhoClicked();
+        if (!CommandMain.isopenInventory.containsKey(player) || !CommandMain.isopenInventory.get(player)) {
+            return;
+        }
 
-								case MIDDLE:
-									boolean is1 = InventoryAPI.planchange(pl, plan.MIDDLE);
-									pd = Filerelation.readFile(pl);
-									if (pd.getFinish() == null) {
-										pd.setFinish(Calendar.getInstance());
-										Filerelation.createFile(pd);
-									}
-									if (is1) {
-										pl.sendMessage("[foofle drive]プランを" + plan.MIDDLE + "プランに変更しました。");
-									}
-									break;
+        ItemStack clickedItem = e.getCurrentItem();
+        Inventory clickedInventory = e.getClickedInventory();
+        if (clickedItem == null || clickedInventory == null || !clickedItem.hasItemMeta()) {
+            return;
+        }
 
-								case LARGE:
-									boolean is2 = InventoryAPI.planchange(pl, plan.LARGE);
-									pd = Filerelation.readFile(pl);
-									if (pd.getFinish() == null) {
-										pd.setFinish(Calendar.getInstance());
-										Filerelation.createFile(pd);
-									}
-									if (is2) {
-										pl.sendMessage("[foofle drive]プランを" + plan.LARGE + "プランに変更しました。");
-									}
-									break;
-							}
-							pl.closeInventory();
-						} else if (e.getSlot() == 11) {
-							e.setCancelled(true);
-							e.getWhoClicked().closeInventory();
-						} else if (clickedItem.getType() == Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
-							e.setCancelled(true);
-						}
-					}
-				}
-			}
-		}
-	}
+        if (e.getView().getType() != InventoryType.CREATIVE && e.getView().getTitle().contains("プラン選択画面")) {
+            handlePlanSelection(e, player);
+        } else if (e.getView().getTitle().contains("契約してよろしいですか？")) {
+            handleContractConfirmation(e, player);
+        }
+    }
 
-	private Inventory yesornoInv(){
-		Inventory inv = Bukkit.createInventory(null,27,"契約してよろしいですか？");
-		ItemStack is = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE,1);
-		ItemMeta im0 = is.getItemMeta();
-		im0.setDisplayName(" ");
-		ItemStack is1 = new ItemStack(Material.GREEN_STAINED_GLASS_PANE,1);
-		ItemMeta im1 = is1.getItemMeta();
-		im1.setDisplayName("はい");
-		ItemStack is2 = new ItemStack(Material.RED_STAINED_GLASS_PANE,1);
-		ItemMeta im2 = is1.getItemMeta();
-		im2.setDisplayName("いいえ");
+    private void handlePlanSelection(InventoryClickEvent e, Player player) {
+        switch (e.getSlot()) {
+            case 10:
+                openConfirmationInventory(e, player, plan.FREE);
+                break;
+            case 12:
+                openConfirmationInventory(e, player, plan.LIGHT);
+                break;
+            case 14:
+                openConfirmationInventory(e, player, plan.MIDDLE);
+                break;
+            case 16:
+                openConfirmationInventory(e, player, plan.LARGE);
+                break;
+            default:
+                if (e.getCurrentItem().getType() == Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
+                    e.setCancelled(true);
+                }
+                break;
+        }
+    }
 
-		is.setItemMeta(im0);
-		is1.setItemMeta(im1);
-		is2.setItemMeta(im2);
+    private void openConfirmationInventory(InventoryClickEvent e, Player player, plan selectedPlan) {
+        e.setCancelled(true);
+        player.openInventory(createConfirmationInventory());
+        provisionalPlan.put(player, selectedPlan);
+    }
 
-		for(int a = 0 ; a<= 26 ; a++){
-			if(a == 11){
-				inv.setItem(a,is2);
-			}
-			else if(a == 15){
-				inv.setItem(a,is1);
-			}
-			else {
-				inv.setItem(a,is);
-			}
-		}
-		return inv;
-	}
+    private void handleContractConfirmation(InventoryClickEvent e, Player player) {
+        switch (e.getSlot()) {
+            case 15:
+                confirmPlanChange(e, player);
+                break;
+            case 11:
+                e.setCancelled(true);
+                player.closeInventory();
+                break;
+            default:
+                if (e.getCurrentItem().getType() == Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
+                    e.setCancelled(true);
+                }
+                break;
+        }
+    }
+
+    private void confirmPlanChange(InventoryClickEvent e, Player player) {
+        e.setCancelled(true);
+        plan selectedPlan = provisionalPlan.get(player);
+        boolean planChanged = InventoryAPI.planchange(player, selectedPlan);
+        Playerdata playerData = Filerelation.readFile(player);
+
+        if (playerData.getFinish() == null) {
+            playerData.setFinish(Calendar.getInstance());
+            Filerelation.createFile(playerData);
+        }
+
+        if (planChanged) {
+            player.sendMessage("[foofle drive]プランを" + selectedPlan + "プランに変更しました。");
+        }
+
+        player.closeInventory();
+    }
+
+    private Inventory createConfirmationInventory() {
+        Inventory inv = Bukkit.createInventory(null, 27, "契約してよろしいですか？");
+        ItemStack grayPane = createItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE, " ");
+        ItemStack greenPane = createItemStack(Material.GREEN_STAINED_GLASS_PANE, "はい");
+        ItemStack redPane = createItemStack(Material.RED_STAINED_GLASS_PANE, "いいえ");
+
+        for (int i = 0; i <= 26; i++) {
+            if (i == 11) {
+                inv.setItem(i, redPane);
+            } else if (i == 15) {
+                inv.setItem(i, greenPane);
+            } else {
+                inv.setItem(i, grayPane);
+            }
+        }
+        return inv;
+    }
+
+    private ItemStack createItemStack(Material material, String displayName) {
+        ItemStack itemStack = new ItemStack(material, 1);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(displayName);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
 }

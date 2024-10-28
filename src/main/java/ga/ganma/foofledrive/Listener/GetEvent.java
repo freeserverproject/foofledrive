@@ -1,7 +1,7 @@
 package ga.ganma.foofledrive.Listener;
 
-import ga.ganma.foofledrive.Foofledrive;
 import ga.ganma.foofledrive.Filerelation;
+import ga.ganma.foofledrive.Foofledrive;
 import ga.ganma.foofledrive.plan;
 import ga.ganma.foofledrive.playerdata.Playerdata;
 import org.bukkit.Bukkit;
@@ -17,58 +17,54 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class GetEvent implements Listener {
-	private Player p;
-	private Plugin pl;
+    public static HashMap<Player, Boolean> isInventoryOpen = new HashMap<>();
+    private final Plugin pl;
 
-	public static HashMap<Player, Boolean> isinventoryopen = new HashMap<>();
+    public GetEvent(Plugin pl) {
+        Bukkit.getPluginManager().registerEvents(this, pl);
+        this.pl = pl;
+    }
 
-	public GetEvent(Plugin pl) {
-		Bukkit.getPluginManager().registerEvents(this, pl);
-		this.pl = pl;
-	}
+    @EventHandler
+    public void getplayerloginEvent(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        Playerdata pd = Filerelation.readFile(p);
 
-	@EventHandler
-	public void getplayerloginEvent(PlayerJoinEvent e) {
-		p = e.getPlayer();
-		if (Filerelation.namecheck(p)) {
-			if (Filerelation.readFile(p).getPlan() == plan.FREE) {
-				p.sendMessage("[foofle drive]あなたは現在" + Filerelation.readFile(p).getPlan() + "プランに加入しています。");
-				return;
-			}
-			else {
-				Playerdata pd = Filerelation.readFile(p);
-				double bal = Foofledrive.econ.getBalance(p);
-				if (pd.getFinish() != null) {
-					new BukkitRunnable() {
-						@Override
-						public void run() {
-							long diffTime = pd.getFinish().getTimeInMillis() - Calendar.getInstance().getTimeInMillis();//[3]
-							int diffDayMillis = 1000 * 60 * 60 * 24;//[4]
-							int diffDays = (int) (diffTime / diffDayMillis);
-							p.sendMessage("[foofle drive]あなたは現在"+Filerelation.readFile(p).getPlan() +"プランに加入しています。");
-							p.sendMessage("[foofle drive]支払日まであと"+ diffDays +"日です。");//[5]
-						}
-					}.runTaskLater(pl,60);
-				}
-				else {
-					pd.setFinish(Calendar.getInstance());
-					Filerelation.createFile(pd);
-				}
-			}
-		}
-		else {
-			Playerdata pd = new Playerdata(p, Bukkit.getServer().createInventory(null, 9, "foofle Drive"), plan.FREE);
-			Filerelation.createFile(pd);
-			p.sendMessage("[foofle drive]あなたは自動的に" + Filerelation.readFile(p).getPlan() + "プランに加入しました。");
-		}
-	}
+        if (Filerelation.nameCheck(p)) {
+            if (pd.getPlan() == plan.FREE) {
+                p.sendMessage("[foofle drive]あなたは現在" + pd.getPlan() + "プランに加入しています。");
+            } else {
+                double bal = Foofledrive.econ.getBalance(p);
+                if (pd.getFinish() != null) {
+                    Playerdata finalPd = pd;
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            long diffTime = finalPd.getFinish().getTimeInMillis() - Calendar.getInstance().getTimeInMillis();
+                            int diffDayMillis = 1000 * 60 * 60 * 24;
+                            int diffDays = (int) (diffTime / diffDayMillis);
+                            p.sendMessage("[foofle drive]あなたは現在" + finalPd.getPlan() + "プランに加入しています。");
+                            p.sendMessage("[foofle drive]支払日まであと" + diffDays + "日です。");
+                        }
+                    }.runTaskLater(pl, 60);
+                } else {
+                    pd.setFinish(Calendar.getInstance());
+                    Filerelation.createFile(pd);
+                }
+            }
+        } else {
+            pd = new Playerdata(p, Bukkit.getServer().createInventory(null, 9, "foofle Drive"), plan.FREE);
+            Filerelation.createFile(pd);
+            p.sendMessage("[foofle drive]あなたは自動的に" + pd.getPlan() + "プランに加入しました。");
+        }
+    }
 
-	@EventHandler
-	public void getPlayerInventoryCloseEvent(InventoryCloseEvent e) {
-		Player pl = (Player) e.getPlayer();
-		if(e.getView().getTitle().equals("foofle drive")){
-				Playerdata pd = new Playerdata(pl,e.getView().getTopInventory(),Filerelation.readFile(pl).getPlan());
-				Filerelation.createFile(pd);
-		}
-	}
+    @EventHandler
+    public void getPlayerInventoryCloseEvent(InventoryCloseEvent e) {
+        Player pl = (Player) e.getPlayer();
+        if (e.getView().getTitle().equals("foofle drive")) {
+            Playerdata pd = new Playerdata(pl, e.getView().getTopInventory(), Filerelation.readFile(pl).getPlan());
+            Filerelation.createFile(pd);
+        }
+    }
 }

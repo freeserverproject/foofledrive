@@ -11,48 +11,47 @@ import java.util.Calendar;
 import java.util.UUID;
 
 public class Playerdata implements Serializable {
-	private UUID mcid;
-	private plan plan;
-	private String inventorySt;
-	private Calendar finish;
+    private final UUID mcid;
+    private final plan plan;
+    private final String inventorySt;
+    private Calendar finish;
 
-	public Playerdata(Player pl, Inventory inv, plan plan) {
-		this.mcid = pl.getUniqueId();
-		this.plan = plan;
-		this.inventorySt = InventoryEncoder.inventoryToString(inv);
-	}
+    public Playerdata(Player pl, Inventory inv, plan plan) {
+        this.mcid = pl.getUniqueId();
+        this.plan = plan;
+        this.inventorySt = InventoryEncoder.inventoryToString(inv);
+    }
 
-	public Playerdata(OfflinePlayer pl, Inventory inv, plan plan) {
-		this.mcid = pl.getUniqueId();
-		this.plan = plan;
-		this.inventorySt = InventoryEncoder.inventoryToString(inv);
-	}
+    public Playerdata(OfflinePlayer pl, Inventory inv, plan plan) {
+        this.mcid = pl.getUniqueId();
+        this.plan = plan;
+        this.inventorySt = InventoryEncoder.inventoryToString(inv);
+    }
 
-	public ga.ganma.foofledrive.plan getPlan() {
-		return plan;
-	}
+    public ga.ganma.foofledrive.plan getPlan() {
+        return plan;
+    }
 
-	public UUID getMcid() {
-		return mcid;
-	}
+    public UUID getMcid() {
+        return mcid;
+    }
 
-	public Inventory getInv() {
-		return InventoryEncoder.stringToInventory(inventorySt);
-	}
+    public Inventory getInv() {
+        return InventoryEncoder.stringToInventory(inventorySt);
+    }
 
-	public void setFinish(Calendar cl){
-		cl.add(Calendar.DAY_OF_MONTH,+7);
-		finish = cl;
-	}
+    public Calendar getFinish() {
+        if (finish != null) {
+            return finish;
+        } else {
+            Calendar cl = Calendar.getInstance();
+            setFinish(cl);
+        }
+        return finish;
+    }
 
-	public Calendar getFinish(){
-		if(finish != null) {
-			return finish;
-		}
-		else {
-			Calendar cl = Calendar.getInstance();
-			setFinish(cl);
-		}
-		return finish;
-	}
+    public void setFinish(Calendar cl) {
+        cl.add(Calendar.DAY_OF_MONTH, +7);
+        finish = cl;
+    }
 }

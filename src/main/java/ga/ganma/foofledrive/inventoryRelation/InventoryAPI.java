@@ -17,149 +17,78 @@ import java.util.Calendar;
 import java.util.List;
 
 public class InventoryAPI {
-	public static Inventory Inventorysizechange(Inventory oldInv, int setsize){
-		Inventory inv = Bukkit.createInventory(null,setsize,"foofle drive");
-		inv.setStorageContents(oldInv.getStorageContents());
-		return inv;
-	}
+    public static void planchange(OfflinePlayer player, plan plan) {
+        Inventory inv = createInventoryForPlan(plan);
+        ItemStack[] is = trimInventoryItems(Filerelation.readFile(player).getInv().getStorageContents(), plan);
 
-	public static boolean planchange(Player player, plan plan){
-		Inventory inv = null;
-		ItemStack[] is = null;
-		switch (plan){
-			case FREE:
-				inv = Bukkit.createInventory(null,9,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				if(is.length > 9){
-					int a = is.length;
-					List<ItemStack> isl = new ArrayList<>(Arrays.asList(is));
-					isl.subList(9,a).clear();
-					ItemStack[] array = new ItemStack[isl.size()];
-					int i = 0;
-					for (ItemStack ist : isl){
-						array[i] = ist;
-						i += 1;
-					}
-					is = array;
-				}
-				break;
+        inv.setStorageContents(is);
+        Foofledrive.econ.withdrawPlayer(player, Economy.getPlanCost(Filerelation.readFile(player).getPlan()));
+        Playerdata pd = new Playerdata(player, inv, plan);
+        pd.setFinish(Calendar.getInstance());
+        Filerelation.createFile(pd);
+    }
 
-			case LIGHT:
-				inv = Bukkit.createInventory(null,18,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				if(is.length >= 19){
-					int a = is.length;
-					List<ItemStack> isl = new ArrayList<>(Arrays.asList(is));
-					isl.subList(18,a).clear();
-					ItemStack[] array = new ItemStack[isl.size()];
-					int i = 0;
-					for (ItemStack ist : isl){
-						array[i] = ist;
-						i += 1;
-					}
-					is = array;
-				}
-				break;
-			case MIDDLE:
-				inv = Bukkit.createInventory(null,27,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				if(is.length >= 28){
-					int a = is.length;
-					List<ItemStack> isl = new ArrayList<>(Arrays.asList(is));
-					isl.subList(27,a).clear();
-					ItemStack[] array = new ItemStack[isl.size()];
-					int i = 0;
-					for (ItemStack ist : isl){
-						array[i] = ist;
-						i += 1;
-					}
-					is = array;
-				}
-				break;
+    public static boolean planchange(Player player, plan plan) {
+        Inventory inv = createInventoryForPlan(plan);
+        ItemStack[] is = trimInventoryItems(Filerelation.readFile(player).getInv().getStorageContents(), plan);
 
-			case LARGE:
-				inv = Bukkit.createInventory(null,54,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				break;
-		}
-		if(Foofledrive.econ.getBalance(player) >= Economy.getplanmoney(plan)) {
-			inv.setStorageContents(is);
-			Playerdata pd = new Playerdata(player, inv, plan);
-			pd.setFinish(Calendar.getInstance());
-			Foofledrive.econ.withdrawPlayer(player, Economy.getplanmoney(plan));
-			player.sendMessage("[foofle drive]このプランの一週間の利用料金を払いました。");
-			Filerelation.createFile(pd);
-			return true;
-		}
-		else {
-			player.sendMessage("[foofle drive]お金が足りないため、" + plan + "プランの契約ができませんでした。");
-		}
-		return false;
-	}
+        if (Foofledrive.econ.getBalance(player) >= Economy.getPlanCost(plan)) {
+            inv.setStorageContents(is);
+            Playerdata pd = new Playerdata(player, inv, plan);
+            pd.setFinish(Calendar.getInstance());
+            Foofledrive.econ.withdrawPlayer(player, Economy.getPlanCost(plan));
+            player.sendMessage("[foofle drive]このプランの一週間の利用料金を払いました。");
+            Filerelation.createFile(pd);
+            return true;
+        } else {
+            player.sendMessage("[foofle drive]お金が足りないため、" + plan + "プランの契約ができませんでした。");
+        }
+        return false;
+    }
 
-	public static void planchange(OfflinePlayer player, plan plan){
-		Inventory inv = null;
-		ItemStack[] is = null;
-		switch (plan){
-			case FREE:
-				inv = Bukkit.createInventory(null,9,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				if(is.length > 9){
-					int a = is.length;
-					List<ItemStack> isl = new ArrayList<>(Arrays.asList(is));
-					isl.subList(9,a).clear();
-					ItemStack[] array = new ItemStack[isl.size()];
-					int i = 0;
-					for (ItemStack ist : isl){
-						array[i] = ist;
-						i += 1;
-					}
-					is = array;
-				}
-				break;
+    public static Inventory createInventoryForPlan(plan plan) {
+        switch (plan) {
+            case FREE:
+                return Bukkit.createInventory(null, 9, "foofle drive");
+            case LIGHT:
+                return Bukkit.createInventory(null, 18, "foofle drive");
+            case MIDDLE:
+                return Bukkit.createInventory(null, 27, "foofle drive");
+            case LARGE:
+                return Bukkit.createInventory(null, 54, "foofle drive");
+            default:
+                throw new IllegalArgumentException("Unknown plan: " + plan);
+        }
+    }
 
-			case LIGHT:
-				inv = Bukkit.createInventory(null,18,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				if(is.length >= 19){
-					int a = is.length;
-					List<ItemStack> isl = new ArrayList<>(Arrays.asList(is));
-					isl.subList(18,a).clear();
-					ItemStack[] array = new ItemStack[isl.size()];
-					int i = 0;
-					for (ItemStack ist : isl){
-						array[i] = ist;
-						i += 1;
-					}
-					is = array;
-				}
-				break;
-			case MIDDLE:
-				inv = Bukkit.createInventory(null,27,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				if(is.length >= 28){
-					int a = is.length;
-					List<ItemStack> isl = new ArrayList<>(Arrays.asList(is));
-					isl.subList(27,a).clear();
-					ItemStack[] array = new ItemStack[isl.size()];
-					int i = 0;
-					for (ItemStack ist : isl){
-						array[i] = ist;
-						i += 1;
-					}
-					is = array;
-				}
-				break;
+    public static ItemStack[] trimInventoryItems(ItemStack[] items, plan plan) {
+        int maxSize = getMaxSizeForPlan(plan);
+        if (items.length > maxSize) {
+            List<ItemStack> itemList = new ArrayList<>(Arrays.asList(items));
+            itemList.subList(maxSize, items.length).clear();
+            return itemList.toArray(new ItemStack[0]);
+        }
+        return items;
+    }
 
-			case LARGE:
-				inv = Bukkit.createInventory(null,54,"foofle drive");
-				is = Filerelation.readFile(player).getInv().getStorageContents();
-				break;
-		}
-		inv.setStorageContents(is);
-		Foofledrive.econ.withdrawPlayer(player,Economy.getplanmoney(Filerelation.readFile(player).getPlan()));
-		Playerdata pd = new Playerdata(player,inv,plan);
-		pd.setFinish(Calendar.getInstance());
-		Filerelation.createFile(pd);
-	}
+    public static int getMaxSizeForPlan(plan plan) {
+        switch (plan) {
+            case FREE:
+                return 9;
+            case LIGHT:
+                return 18;
+            case MIDDLE:
+                return 27;
+            case LARGE:
+                return 54;
+            default:
+                throw new IllegalArgumentException("Unknown plan: " + plan);
+        }
+    }
+
+    public Inventory Inventorysizechange(Inventory oldInv, int setsize) {
+        Inventory inv = Bukkit.createInventory(null, setsize, "foofle drive");
+        inv.setStorageContents(oldInv.getStorageContents());
+        return inv;
+    }
 }
