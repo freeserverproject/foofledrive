@@ -147,8 +147,8 @@ public class CommandMain implements CommandExecutor {
      * @param player メッセージを受け取るプレイヤー
      */
     private void sendHelpMessage(Player player) {
-        player.sendMessage("[free drive] /fl open でfoofle driveを開くことができます。");
-        player.sendMessage("[free drive] /fl plan で好きなプランに加入することができます。");
+        player.sendMessage("[foofle drive] /fl open でfoofle driveを開くことができます。");
+        player.sendMessage("[foofle drive] /fl plan で好きなプランに加入することができます。");
     }
 
     /**
