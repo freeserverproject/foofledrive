@@ -1,6 +1,6 @@
 package ga.ganma.foofledrive.inventoryRelation;
 
-import ga.ganma.foofledrive.Filerelation;
+import ga.ganma.foofledrive.FileRelationUtils;
 import ga.ganma.foofledrive.Foofledrive;
 import ga.ganma.foofledrive.economy.Economy;
 import ga.ganma.foofledrive.plan;
@@ -17,20 +17,20 @@ import java.util.Calendar;
 import java.util.List;
 
 public class InventoryAPI {
-    public static void planchange(OfflinePlayer player, plan plan) {
+    public static void changePlan(OfflinePlayer player, plan plan) {
         Inventory inv = createInventoryForPlan(plan);
-        ItemStack[] is = trimInventoryItems(Filerelation.readFile(player).getInv().getStorageContents(), plan);
+        ItemStack[] is = trimInventoryItems(FileRelationUtils.readFile(player).getInv().getStorageContents(), plan);
 
         inv.setStorageContents(is);
-        Foofledrive.econ.withdrawPlayer(player, Economy.getPlanCost(Filerelation.readFile(player).getPlan()));
+        Foofledrive.econ.withdrawPlayer(player, Economy.getPlanCost(FileRelationUtils.readFile(player).getPlan()));
         Playerdata pd = new Playerdata(player, inv, plan);
         pd.setFinish(Calendar.getInstance());
-        Filerelation.createFile(pd);
+        FileRelationUtils.createFile(pd);
     }
 
-    public static boolean planchange(Player player, plan plan) {
+    public static boolean changePlan(Player player, plan plan) {
         Inventory inv = createInventoryForPlan(plan);
-        ItemStack[] is = trimInventoryItems(Filerelation.readFile(player).getInv().getStorageContents(), plan);
+        ItemStack[] is = trimInventoryItems(FileRelationUtils.readFile(player).getInv().getStorageContents(), plan);
 
         if (Foofledrive.econ.getBalance(player) >= Economy.getPlanCost(plan)) {
             inv.setStorageContents(is);
@@ -38,7 +38,7 @@ public class InventoryAPI {
             pd.setFinish(Calendar.getInstance());
             Foofledrive.econ.withdrawPlayer(player, Economy.getPlanCost(plan));
             player.sendMessage("[foofle drive]このプランの一週間の利用料金を払いました。");
-            Filerelation.createFile(pd);
+            FileRelationUtils.createFile(pd);
             return true;
         } else {
             player.sendMessage("[foofle drive]お金が足りないため、" + plan + "プランの契約ができませんでした。");
@@ -86,7 +86,7 @@ public class InventoryAPI {
         }
     }
 
-    public Inventory Inventorysizechange(Inventory oldInv, int setsize) {
+    public Inventory inventorySizeChange(Inventory oldInv, int setsize) {
         Inventory inv = Bukkit.createInventory(null, setsize, "foofle drive");
         inv.setStorageContents(oldInv.getStorageContents());
         return inv;

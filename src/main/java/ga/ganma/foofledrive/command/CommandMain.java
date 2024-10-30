@@ -1,6 +1,6 @@
 package ga.ganma.foofledrive.command;
 
-import ga.ganma.foofledrive.Filerelation;
+import ga.ganma.foofledrive.FileRelationUtils;
 import ga.ganma.foofledrive.Foofledrive;
 import ga.ganma.foofledrive.economy.Economy;
 import ga.ganma.foofledrive.plan;
@@ -69,7 +69,7 @@ public class CommandMain implements CommandExecutor {
 
         switch (args[0].toLowerCase()) {
             case "open":
-                new Subopen(plugin, player);
+                new SubmitOpen(plugin, player);
                 break;
             case "plan":
                 handlePlanCommand(player, args);
@@ -96,9 +96,9 @@ public class CommandMain implements CommandExecutor {
         if (args.length > 1) {
             plan selectedPlan = getPlanFromString(args[1]);
             if (selectedPlan != null) {
-                new Subplan(plugin, player, selectedPlan);
+                new SubmitPlan(plugin, player, selectedPlan);
                 if (selectedPlan == plan.LIGHT) {
-                    Filerelation.readFile(player).setFinish(Calendar.getInstance());
+                    FileRelationUtils.readFile(player).setFinish(Calendar.getInstance());
                 }
             } else {
                 sendPlanSelectionInventory(player);
@@ -130,10 +130,10 @@ public class CommandMain implements CommandExecutor {
     private void handleReloadCommand(Player player) {
         if (player.isOp()) {
             plugin.reloadConfig();
-            Foofledrive.configamout[0] = plugin.getConfig().getInt("amout.FREE");
-            Foofledrive.configamout[1] = plugin.getConfig().getInt("amout.LIGHT");
-            Foofledrive.configamout[2] = plugin.getConfig().getInt("amout.MIDDLE");
-            Foofledrive.configamout[3] = plugin.getConfig().getInt("amout.LARGE");
+            Foofledrive.configValues[0] = plugin.getConfig().getInt("amout.FREE");
+            Foofledrive.configValues[1] = plugin.getConfig().getInt("amout.LIGHT");
+            Foofledrive.configValues[2] = plugin.getConfig().getInt("amout.MIDDLE");
+            Foofledrive.configValues[3] = plugin.getConfig().getInt("amout.LARGE");
             Foofledrive.unit = plugin.getConfig().getString("unit");
             player.sendMessage("[foofle drive]コンフィグをリロードしました。");
         } else {

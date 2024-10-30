@@ -3,6 +3,7 @@
  */
 package ga.ganma.foofledrive.bukkitRunnable;
 
+import ga.ganma.foofledrive.FileRelationUtils;
 import ga.ganma.foofledrive.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -27,7 +28,7 @@ public class Runnable extends BukkitRunnable {
      */
     public Runnable(Plugin plugin) {
         this.plugin = plugin;
-        this.playerDataFolder = new File(plugin.getDataFolder(), "playerdata");
+        this.playerDataFolder = FileRelationUtils.PLAYERDATA_FOLDER.toFile();
     }
 
     /**
@@ -54,7 +55,7 @@ public class Runnable extends BukkitRunnable {
      */
     private void processPlayerDataFile(File playerDataFile) {
         String fileName = playerDataFile.getName();
-        String uuidString = fileName.substring(0, fileName.lastIndexOf('.'));
+        String uuidString = fileName.replace(FileRelationUtils.DATA_FILE_EXTENTION, "");
         UUID playerUUID = UUID.fromString(uuidString);
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
         Economy.paymoney(offlinePlayer);

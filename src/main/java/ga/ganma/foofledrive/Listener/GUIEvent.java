@@ -1,6 +1,6 @@
 package ga.ganma.foofledrive.Listener;
 
-import ga.ganma.foofledrive.Filerelation;
+import ga.ganma.foofledrive.FileRelationUtils;
 import ga.ganma.foofledrive.command.CommandMain;
 import ga.ganma.foofledrive.inventoryRelation.InventoryAPI;
 import ga.ganma.foofledrive.plan;
@@ -22,20 +22,18 @@ import java.util.HashMap;
 
 public class GUIEvent implements Listener {
 
-    private static final HashMap<Player, ga.ganma.foofledrive.plan> provisionalPlan = new HashMap<>();
+    private static final HashMap<Player, plan> provisionalPlan = new HashMap<>();
 
     public GUIEvent(Plugin pl) {
         Bukkit.getPluginManager().registerEvents(this, pl);
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent e) {
-        if (e.getWhoClicked() == null) {
+    public void onInventoryClickEvent(InventoryClickEvent e) {
+        if(!(e.getWhoClicked() instanceof Player player)) {
             return;
         }
-
-        Player player = (Player) e.getWhoClicked();
-        if (!CommandMain.isopenInventory.containsKey(player) || !CommandMain.isopenInventory.get(player)) {
+        if ((CommandMain.isopenInventory.containsKey(player) && CommandMain.isopenInventory.get(player)) == false) {
             return;
         }
 
@@ -100,12 +98,12 @@ public class GUIEvent implements Listener {
     private void confirmPlanChange(InventoryClickEvent e, Player player) {
         e.setCancelled(true);
         plan selectedPlan = provisionalPlan.get(player);
-        boolean planChanged = InventoryAPI.planchange(player, selectedPlan);
-        Playerdata playerData = Filerelation.readFile(player);
+        boolean planChanged = InventoryAPI.changePlan(player, selectedPlan);
+        Playerdata playerData = FileRelationUtils.readFile(player);
 
         if (playerData.getFinish() == null) {
             playerData.setFinish(Calendar.getInstance());
-            Filerelation.createFile(playerData);
+            FileRelationUtils.createFile(playerData);
         }
 
         if (planChanged) {

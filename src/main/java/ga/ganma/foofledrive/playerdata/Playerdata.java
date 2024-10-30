@@ -10,6 +10,11 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.UUID;
 
+/**
+ * @deprecated Playerdataクラスは旧データクラスのため、新規には使用しないでください。
+ * @see ga.ganma.foofledrive.bizlogic.convert.ConvertPlayerData
+ */
+@Deprecated(since = "0.8.0", forRemoval = false)
 public class Playerdata implements Serializable {
     private final UUID mcid;
     private final plan plan;

@@ -1,6 +1,6 @@
 package ga.ganma.foofledrive.economy;
 
-import ga.ganma.foofledrive.Filerelation;
+import ga.ganma.foofledrive.FileRelationUtils;
 import ga.ganma.foofledrive.Foofledrive;
 import ga.ganma.foofledrive.inventoryRelation.InventoryAPI;
 import ga.ganma.foofledrive.plan;
@@ -15,11 +15,11 @@ import java.util.logging.Level;
 public class Economy {
 
     public static void paymoney(Player p) {
-        processPayment(p, Filerelation.readFile(p), Foofledrive.econ.getBalance(p));
+        processPayment(p, FileRelationUtils.readFile(p), Foofledrive.econ.getBalance(p));
     }
 
     public static void paymoney(OfflinePlayer p) {
-        processPayment(p, Filerelation.readFile(p), Foofledrive.econ.getBalance(p));
+        processPayment(p, FileRelationUtils.readFile(p), Foofledrive.econ.getBalance(p));
     }
 
     private static void processPayment(OfflinePlayer p, Playerdata pd, double bal) {
@@ -29,9 +29,9 @@ public class Economy {
                 Foofledrive.econ.withdrawPlayer(p, planCost);
                 logAndNotify(p, pd.getPlan() + "プランの料金を支払いました。", "[foofle drive]料金の支払いをしました。");
                 pd.setFinish(Calendar.getInstance());
-                Filerelation.createFile(pd);
+                FileRelationUtils.createFile(pd);
             } else {
-                InventoryAPI.planchange(p, plan.FREE);
+                InventoryAPI.changePlan(p, plan.FREE);
                 logAndNotify(p, "お金が足りないため、自動的にfreeプランへ移行しました。", "[foofle drive]お金が足りないため、自動的にfreeプランへ移行しました。");
                 logAndNotify(p, "その際、2段目以降にあるアイテムを全消去しました。", "[foofle drive]その際、2段目以降にあるアイテムを全消去しました。");
             }
@@ -48,13 +48,13 @@ public class Economy {
     public static int getPlanCost(plan plan) {
         switch (plan) {
             case FREE:
-                return Foofledrive.configamout[0];
+                return Foofledrive.configValues[0];
             case LIGHT:
-                return Foofledrive.configamout[1];
+                return Foofledrive.configValues[1];
             case MIDDLE:
-                return Foofledrive.configamout[2];
+                return Foofledrive.configValues[2];
             case LARGE:
-                return Foofledrive.configamout[3];
+                return Foofledrive.configValues[3];
             default:
                 return 0;
         }

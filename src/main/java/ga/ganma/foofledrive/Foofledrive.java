@@ -16,7 +16,7 @@ public final class Foofledrive extends JavaPlugin {
 
     private static final Logger log = Logger.getLogger("Minecraft");
     public static Economy econ = null;
-    public static int[] configamout = new int[4];
+    public static int[] configValues = new int[4];
     public static String unit;
     public static Plugin ender;
 
@@ -53,10 +53,10 @@ public final class Foofledrive extends JavaPlugin {
     }
 
     private void loadConfigValues() {
-        configamout[0] = getConfig().getInt("amout.FREE");
-        configamout[1] = getConfig().getInt("amout.LIGHT");
-        configamout[2] = getConfig().getInt("amout.MIDDLE");
-        configamout[3] = getConfig().getInt("amout.LARGE");
+        configValues[0] = getConfig().getInt("amout.FREE");
+        configValues[1] = getConfig().getInt("amout.LIGHT");
+        configValues[2] = getConfig().getInt("amout.MIDDLE");
+        configValues[3] = getConfig().getInt("amout.LARGE");
         unit = getConfig().getString("unit");
     }
 }
