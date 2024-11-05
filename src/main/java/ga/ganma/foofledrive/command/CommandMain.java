@@ -1,6 +1,6 @@
 package ga.ganma.foofledrive.command;
 
-import ga.ganma.foofledrive.Filerelation;
+import ga.ganma.foofledrive.FileRelationUtils;
 import ga.ganma.foofledrive.Foofledrive;
 import ga.ganma.foofledrive.economy.Economy;
 import ga.ganma.foofledrive.plan;
@@ -21,119 +21,204 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
+/**
+ * CommandMainクラスは、/flまたは/foofledriveコマンドの実行を処理するクラスです。
+ * このクラスは、プレイヤーがコマンドを入力した際に適切なアクションを実行します。
+ */
 public class CommandMain implements CommandExecutor {
-	public static HashMap<Player,Boolean> isopenInventory = new HashMap<>();
-	private Plugin pl;
+    public static final HashMap<Player, Boolean> isopenInventory = new HashMap<>();
+    private final Plugin plugin;
 
-	public CommandMain(Plugin pl) {
-		this.pl = pl;
-	}
+    public CommandMain(Plugin plugin) {
+        this.plugin = plugin;
+    }
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player p = (Player) sender;
-			if (label.equalsIgnoreCase("fl") || label.equalsIgnoreCase("foofledrive")) {
-				if (args.length != 0) {
-					if (args[0].equalsIgnoreCase("open")) {
-						new Subopen(this.pl, (Player) sender);
-					} else if (args[0].equalsIgnoreCase("plan")) {
-						if (args.length > 1) {
-							if (args[1].equalsIgnoreCase("LIGHT")) {
-								new Subplan(this.pl, p, plan.LIGHT);
-								Filerelation.readFile(p).setFinish(Calendar.getInstance());
-							} else if (args[1].equalsIgnoreCase("FREE")) {
-								new Subplan(this.pl, p, plan.FREE);
-							}else if (args[1].equalsIgnoreCase("MIDDLE")) {
-								new Subplan(this.pl, p, plan.MIDDLE);
-							}else if (args[1].equalsIgnoreCase("LARGE")) {
-								new Subplan(this.pl, p, plan.LARGE);
-							}
-						} else {
-							Inventory inv = Bukkit.createInventory(null,27,"プラン選択画面");
-							ItemStack is = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE,1);
-							ItemMeta im0 = is.getItemMeta();
-							im0.setDisplayName(" ");
-							ItemStack free = new ItemStack(Material.PAPER,1);
-							ItemMeta im1 = free.getItemMeta();
-							im1.setDisplayName("FREEプラン");
-							List<String> freeprice = new ArrayList<>();
-							freeprice.add(Economy.getplanmoney(plan.FREE) + Foofledrive.unit);
-							im1.setLore(freeprice);
-							ItemStack light = new ItemStack(Material.IRON_INGOT,1);
-							ItemMeta im2 = light.getItemMeta();
-							im2.setDisplayName("LIGHTプラン");
-							List<String> lightprice = new ArrayList<>();
-							lightprice.add(Economy.getplanmoney(plan.LIGHT) + Foofledrive.unit);
-							im2.setLore(lightprice);
-							ItemStack middle = new ItemStack(Material.GOLD_INGOT,1);
-							ItemMeta im3 = middle.getItemMeta();
-							im3.setDisplayName("MIDDLEプラン");
-							List<String> middleprice = new ArrayList<>();
-							middleprice.add(Economy.getplanmoney(plan.MIDDLE) + Foofledrive.unit);
-							im3.setLore(middleprice);
-							ItemStack large = new ItemStack(Material.DIAMOND,1);
-							ItemMeta im4 = middle.getItemMeta();
-							im4.setDisplayName("LARGEプラン");
-							List<String> largeprice = new ArrayList<>();
-							largeprice.add(Economy.getplanmoney(plan.LARGE) + Foofledrive.unit);
-							im4.setLore(largeprice);
+    /**
+     * コマンドが実行されたときに呼び出されるメソッドです。
+     *
+     * @param sender  コマンドを実行したエンティティ
+     * @param command 実行されたコマンド
+     * @param label   コマンドのラベル
+     * @param args    コマンドの引数
+     * @return コマンドが正常に処理された場合はtrue、そうでない場合はfalse
+     */
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            if (label.equalsIgnoreCase("fl") || label.equalsIgnoreCase("foofledrive")) {
+                handleCommand(player, args);
+            }
+        } else {
+            plugin.getLogger().log(Level.INFO, "このコマンドはコンソールからではなくプレイヤーが入力するものです。");
+        }
+        return false;
+    }
 
-							is.setItemMeta(im0);
-							free.setItemMeta(im1);
-							light.setItemMeta(im2);
-							middle.setItemMeta(im3);
-							large.setItemMeta(im4);
+    /**
+     * コマンドの引数に基づいて適切なアクションを実行します。
+     *
+     * @param player コマンドを実行したプレイヤー
+     * @param args   コマンドの引数
+     */
+    private void handleCommand(Player player, String[] args) {
+        if (args.length == 0) {
+            sendHelpMessage(player);
+            return;
+        }
 
-							for(int a = 0;a <= 26;a++) {
-								if(a == 10){
-									inv.setItem(a,free);
-								}
-								else if (a == 12){
-									inv.setItem(a,light);
-								}
-								else if(a == 14){
-									inv.setItem(a,middle);
-								}
-								else if(a == 16){
-									inv.setItem(a,large);
-								}
-								else {
-									inv.setItem(a,is);
-								}
-							}
-							isopenInventory.put(p,true);
-							p.openInventory(inv);
-						}
-					}
-					else if(args[0].equalsIgnoreCase("reload")) {
-						if (p.isOp()) {
-							pl.reloadConfig();
-							Foofledrive.configamout[0] = pl.getConfig().getInt("amout.FREE");
-							Foofledrive.configamout[1] = pl.getConfig().getInt("amout.LIGHT");
-							Foofledrive.configamout[2] = pl.getConfig().getInt("amout.MIDDLE");
-							Foofledrive.configamout[3] = pl.getConfig().getInt("amout.LARGE");
-							Foofledrive.unit = pl.getConfig().getString("unit");
-							p.sendMessage("[foofle drive]コンフィグをリロードしました。");
-						}
-						else {
-							p.sendMessage("[foofle drive]このコマンドは管理者専用です。");
-						}
-					}
-					else if(args[0].equalsIgnoreCase("help")){
-						p.sendMessage("[free drive] /fl open でfoofle driveを開くことができます。");
-						p.sendMessage("[free drive] /fl plan で好きなプランに加入することができます。");
-					}
-				}
-				else {
-					p.sendMessage("[free drive] /fl open でfoofle driveを開くことができます。");
-					p.sendMessage("[free drive] /fl plan で好きなプランに加入することができます。");
-				}
-			}
-		}
-		else {
-			pl.getLogger().log(Level.INFO, "このコマンドはコンソールからではなくプレイヤーが入力するものです。");
-		}
-		return false;
-	}
+        switch (args[0].toLowerCase()) {
+            case "open":
+                new SubmitOpen(plugin, player);
+                break;
+            case "plan":
+                handlePlanCommand(player, args);
+                break;
+            case "reload":
+                handleReloadCommand(player);
+                break;
+            case "help":
+                sendHelpMessage(player);
+                break;
+            default:
+                sendHelpMessage(player);
+                break;
+        }
+    }
+
+    /**
+     * /fl planコマンドの処理を行います。
+     *
+     * @param player コマンドを実行したプレイヤー
+     * @param args   コマンドの引数
+     */
+    private void handlePlanCommand(Player player, String[] args) {
+        if (args.length > 1) {
+            plan selectedPlan = getPlanFromString(args[1]);
+            if (selectedPlan != null) {
+                new SubmitPlan(plugin, player, selectedPlan);
+                if (selectedPlan == plan.LIGHT) {
+                    FileRelationUtils.readFile(player).setFinish(Calendar.getInstance());
+                }
+            } else {
+                sendPlanSelectionInventory(player);
+            }
+        } else {
+            sendPlanSelectionInventory(player);
+        }
+    }
+
+    /**
+     * 文字列からplan列挙型を取得します。
+     *
+     * @param planString プランを表す文字列
+     * @return 対応するplan列挙型、無効な場合はnull
+     */
+    private plan getPlanFromString(String planString) {
+        try {
+            return plan.valueOf(planString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * /fl reloadコマンドの処理を行います。
+     *
+     * @param player コマンドを実行したプレイヤー
+     */
+    private void handleReloadCommand(Player player) {
+        if (player.isOp()) {
+            plugin.reloadConfig();
+            Foofledrive.configValues[0] = plugin.getConfig().getInt("amout.FREE");
+            Foofledrive.configValues[1] = plugin.getConfig().getInt("amout.LIGHT");
+            Foofledrive.configValues[2] = plugin.getConfig().getInt("amout.MIDDLE");
+            Foofledrive.configValues[3] = plugin.getConfig().getInt("amout.LARGE");
+            Foofledrive.unit = plugin.getConfig().getString("unit");
+            player.sendMessage("[foofle drive]コンフィグをリロードしました。");
+        } else {
+            player.sendMessage("[foofle drive]このコマンドは管理者専用です。");
+        }
+    }
+
+    /**
+     * プレイヤーにヘルプメッセージを送信します。
+     *
+     * @param player メッセージを受け取るプレイヤー
+     */
+    private void sendHelpMessage(Player player) {
+        player.sendMessage("[foofle drive] /fl open でfoofle driveを開くことができます。");
+        player.sendMessage("[foofle drive] /fl plan で好きなプランに加入することができます。");
+    }
+
+    /**
+     * プレイヤーにプラン選択インベントリを表示します。
+     *
+     * @param player インベントリを表示するプレイヤー
+     */
+    private void sendPlanSelectionInventory(Player player) {
+        Inventory inventory = Bukkit.createInventory(null, 27, "プラン選択画面");
+        ItemStack glassPane = createItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE, " ");
+        ItemStack freePlan = createPlanItemStack(Material.PAPER, "FREEプラン", plan.FREE);
+        ItemStack lightPlan = createPlanItemStack(Material.IRON_INGOT, "LIGHTプラン", plan.LIGHT);
+        ItemStack middlePlan = createPlanItemStack(Material.GOLD_INGOT, "MIDDLEプラン", plan.MIDDLE);
+        ItemStack largePlan = createPlanItemStack(Material.DIAMOND, "LARGEプラン", plan.LARGE);
+
+        for (int i = 0; i <= 26; i++) {
+            switch (i) {
+                case 10:
+                    inventory.setItem(i, freePlan);
+                    break;
+                case 12:
+                    inventory.setItem(i, lightPlan);
+                    break;
+                case 14:
+                    inventory.setItem(i, middlePlan);
+                    break;
+                case 16:
+                    inventory.setItem(i, largePlan);
+                    break;
+                default:
+                    inventory.setItem(i, glassPane);
+                    break;
+            }
+        }
+
+        isopenInventory.put(player, true);
+        player.openInventory(inventory);
+    }
+
+    /**
+     * 指定された素材と表示名でItemStackを作成します。
+     *
+     * @param material    アイテムの素材
+     * @param displayName アイテムの表示名
+     * @return 作成されたItemStack
+     */
+    private ItemStack createItemStack(Material material, String displayName) {
+        ItemStack itemStack = new ItemStack(material, 1);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(displayName);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
+
+    /**
+     * 指定されたプランの情報を含むItemStackを作成します。
+     *
+     * @param material    アイテムの素材
+     * @param displayName アイテムの表示名
+     * @param planType    プランの種類
+     * @return 作成されたItemStack
+     */
+    private ItemStack createPlanItemStack(Material material, String displayName, plan planType) {
+        ItemStack itemStack = new ItemStack(material, 1);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(displayName);
+        List<String> lore = new ArrayList<>();
+        lore.add(Economy.getPlanCost(planType) + Foofledrive.unit);
+        itemMeta.setLore(lore);
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
 }

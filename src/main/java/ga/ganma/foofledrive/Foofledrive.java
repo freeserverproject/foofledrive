@@ -14,45 +14,49 @@ import java.util.logging.Logger;
 
 public final class Foofledrive extends JavaPlugin {
 
-	private static final Logger log = Logger.getLogger("Minecraft");
-	public static Economy econ = null;
-	public static int[] configamout = new int[4];
-	public static String unit;
-	public static Plugin ender;
-	public Foofledrive fl;
+    private static final Logger log = Logger.getLogger("Minecraft");
+    public static Economy econ = null;
+    public static int[] configValues = new int[4];
+    public static String unit;
+    public static Plugin ender;
 
-	@Override
-	public void onEnable() {
-		getDataFolder().mkdir();
-		ender = this;
-		new GetEvent(this);
-		new GUIEvent(this);
-		this.getCommand("fl").setExecutor(new CommandMain(this));
-		this.getCommand("foofledrive").setExecutor(new CommandMain(this));
-		saveDefaultConfig();
-		configamout[0] = this.getConfig().getInt("amout.FREE");
-		configamout[1] = this.getConfig().getInt("amout.LIGHT");
-		configamout[2] = this.getConfig().getInt("amout.MIDDLE");
-		configamout[3] = this.getConfig().getInt("amout.LARGE");
-		unit = this.getConfig().getString("unit");
-		if(!this.setupEconomy()){
-			Bukkit.getPluginManager().disablePlugin(this);
-			Bukkit.getLogger().warning("[foofle drive]Vaultが存在しません！");
-			return;
-		}
-		new Runnable(this).runTaskTimer(this,0,20);
-	}
+    @Override
+    public void onEnable() {
+        getDataFolder().mkdir();
+        ender = this;
+        new GetEvent(this);
+        new GUIEvent(this);
+        CommandMain commandMain = new CommandMain(this);
+        this.getCommand("fl").setExecutor(commandMain);
+        this.getCommand("foofledrive").setExecutor(commandMain);
+        saveDefaultConfig();
+        loadConfigValues();
+        if (!setupEconomy()) {
+            Bukkit.getPluginManager().disablePlugin(this);
+            log.warning("[foofle drive]Vaultが存在しません！");
+            return;
+        }
+        new Runnable(this).runTaskTimer(this, 0, 20);
+    }
 
-	@Override
-	public void onDisable() {
-		// Plugin shutdown logic
-	}
+    @Override
+    public void onDisable() {
+        // Plugin shutdown logic
+    }
 
-	private boolean setupEconomy() {
-		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
-		if (economyProvider != null) {
-			econ = economyProvider.getProvider();
-		}
-		return (econ != null);
-	}
+    private boolean setupEconomy() {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
+        if (economyProvider != null) {
+            econ = economyProvider.getProvider();
+        }
+        return (econ != null);
+    }
+
+    private void loadConfigValues() {
+        configValues[0] = getConfig().getInt("amout.FREE");
+        configValues[1] = getConfig().getInt("amout.LIGHT");
+        configValues[2] = getConfig().getInt("amout.MIDDLE");
+        configValues[3] = getConfig().getInt("amout.LARGE");
+        unit = getConfig().getString("unit");
+    }
 }
