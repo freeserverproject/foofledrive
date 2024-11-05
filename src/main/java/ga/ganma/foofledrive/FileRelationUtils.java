@@ -29,7 +29,7 @@ public final class FileRelationUtils {
      * @return データファイルが存在する場合はtrue、存在しない場合はfalse
      */
     public static boolean nameCheck(Player p) {
-        return new File(PLAYERDATA_FOLDER.toString() + p.getUniqueId() + ".dat").exists();
+        return  nameCheck(p.getUniqueId());
     }
 
     /**
@@ -39,7 +39,7 @@ public final class FileRelationUtils {
      * @return データファイルが存在する場合はtrue、存在しない場合はfalse
      */
     public static boolean nameCheck(OfflinePlayer offp) {
-        return new File(PLAYERDATA_FOLDER.toString() + offp.getUniqueId() + ".dat").exists();
+        return nameCheck(offp.getUniqueId());
     }
 
     public static boolean nameCheck(UUID uuid) {
