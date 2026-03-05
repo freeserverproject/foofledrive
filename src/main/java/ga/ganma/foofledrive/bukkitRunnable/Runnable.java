@@ -24,11 +24,20 @@ public class Runnable extends BukkitRunnable {
 			File[] list = folder.listFiles();
 			if (list != null) {
 				for (File f : list) {
-					String name = f.getName();
-					name = name.substring(0, name.lastIndexOf('.'));
-					UUID id = UUID.fromString(name);
-					OfflinePlayer pl = Bukkit.getOfflinePlayer(id);
-					Economy.paymoney(pl);
+					try {
+						String name = f.getName();
+						int ext = name.lastIndexOf('.');
+						if (ext <= 0) {
+							continue;
+						}
+						name = name.substring(0, ext);
+						UUID id = UUID.fromString(name);
+						OfflinePlayer pl = Bukkit.getOfflinePlayer(id);
+						Economy.paymoney(pl);
+					}
+					catch (IllegalArgumentException e) {
+						plugin.getLogger().warning("playerdataフォルダに不正なファイル名のデータがあります。");
+					}
 				}
 
 			}

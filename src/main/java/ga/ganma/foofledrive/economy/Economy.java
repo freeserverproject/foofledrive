@@ -84,8 +84,11 @@ public class Economy {
 	}
 
 	public static void paymoney(OfflinePlayer p) {
+		if (p == null || Foofledrive.econ == null) {
+			return;
+		}
 		Playerdata pd = Filerelation.readFile(p);
-		if (p != null){
+		if (pd != null){
 			double bal = Foofledrive.econ.getBalance(p);
 			if (pd.getFinish() != null) {
 				if (pd.getFinish().before(Calendar.getInstance())) {
